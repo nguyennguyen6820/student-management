@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+<head>
+    <title>Đăng ký môn học</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3 text-gray-800 mb-0 fw-bold">Đăng ký môn học tiến độ</h2>
+            <a href="/students" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Trở về DS Sinh viên
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-3 border-bottom border-primary border-3">
+                        <h6 class="m-0 fw-bold text-primary">
+                            Sinh viên: <span class="fs-5 text-dark" th:text="${student.fullName}"></span> 
+                            (Mã: <span th:text="${student.id}"></span>)
+                        </h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <form th:action="@{/enrollments/save/{id}(id=${student.id})}" method="post">
+                            <h6 class="mb-3 text-muted text-uppercase fw-bold">Chọn các môn học muốn đăng ký:</h6>
+                            
+                            <div class="list-group mb-4">
+                                <label th:each="sub : ${allSubjects}" class="list-group-item d-flex justify-content-between align-items-center bg-light border-0 mb-2 rounded shadow-sm">
+                                    <div>
+                                        <input class="form-check-input me-2" type="checkbox" name="subjectIds" 
+                                               th:value="${sub.id}" 
+                                               th:checked="${#lists.contains(enrolledSubjectIds, sub.id)}" />
+                                        <span class="fw-bold text-dark" th:text="${sub.name}">Name</span>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill" th:text="${sub.credits + ' Tín chỉ'}">3</span>
+                                </label>
+                                <div th:if="${allSubjects.empty}" class="text-center text-muted col-12">
+                                    Không có môn học nào trong hệ thống!
+                                </div>
+                            </div>
+
+                            <hr>
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-success px-4" th:disabled="${allSubjects.empty}">
+                                    <i class="bi bi-calendar-check-fill me-1"></i> Xác nhận Đăng ký
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+<head>
+    <title>Danh sách Lớp học</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3 text-gray-800 mb-0 fw-bold">Danh sách Lớp Học</h2>
+            <a href="/classes/new" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Thêm lớp học mới
+            </a>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="text-center" width="5%">ID</th>
+                                <th>Tên Lớp</th>
+                                <th>Khoa quản lý</th>
+                                <th class="text-center" width="15%">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="cls : ${classrooms}">
+                                <td class="text-center fw-bold text-muted" th:text="${cls.id}">1</td>
+                                <td class="fw-bold text-primary" th:text="${cls.name}">Name</td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${cls.department != null ? cls.department.name : 'Không xác định'}">Dept</span>
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{/classes/edit/{id}(id=${cls.id})}" class="btn btn-sm btn-outline-warning rounded-circle me-1" title="Sửa">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <a th:href="@{/classes/delete/{id}(id=${cls.id})}" class="btn btn-sm btn-outline-danger rounded-circle" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa lớp này? (Chú ý: Có thể ảnh hưởng tới sinh viên đang học)');">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${classrooms.empty}">
+                                <td colspan="4" class="text-center py-4 text-muted">Không có dữ liệu lớp học</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

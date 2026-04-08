@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+<head>
+    <title>Quản lý điểm số</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3 text-gray-800 mb-0 fw-bold">Quản lý chuyên cần & Điểm số</h2>
+        </div>
+
+        <!-- Filter Card -->
+        <div class="card shadow-sm mb-4 border-0">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 fw-bold" style="color: #4e73df;"><i class="bi bi-funnel-fill me-1"></i> Bộ lọc sinh viên</h6>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/grades}" method="get" class="row align-items-end">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Lớp học</label>
+                        <select name="classId" class="form-select border-start border-4 border-primary" required>
+                            <option value="">-- Chọn lớp học --</option>
+                            <option th:each="cls : ${classrooms}"
+                                    th:value="${cls.id}"
+                                    th:text="${cls.name}"
+                                    th:selected="${param.classId != null and param.classId[0] == cls.id.toString()}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Môn học</label>
+                        <select name="subjectId" class="form-select border-start border-4 border-success" required>
+                            <option value="">-- Chọn môn học --</option>
+                            <option th:each="sub : ${subjects}"
+                                    th:value="${sub.id}"
+                                    th:text="${sub.name}"
+                                    th:selected="${param.subjectId != null and param.subjectId[0] == sub.id.toString()}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i> Lọc danh sách
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Grades Table -->
+        <div th:if="${param.classId != null}" class="card shadow-sm border-0">
+            <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-dark">
+                    Bảng điểm: Lớp <span class="text-primary" th:text="${selectedClass != null ? selectedClass.name : ''}"></span> 
+                    - Môn <span class="text-success" th:text="${selectedSubject != null ? selectedSubject.name : ''}"></span>
+                </h6>
+                <a th:href="@{/grades/export(classId=${param.classId}, subjectId=${param.subjectId})}" class="btn btn-sm btn-success shadow-sm">
+                    <i class="bi bi-file-earmark-excel-fill me-1"></i> Xuất Bảng Điểm
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <form th:action="@{/grades/save}" method="post">
+                    <input type="hidden" name="classId" th:value="${param.classId}" />
+                    <input type="hidden" name="subjectId" th:value="${param.subjectId}" />
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th width="10%" class="text-center">Mã SV</th>
+                                    <th width="25%">Họ và Tên</th>
+                                    <th width="15%" class="text-center">Điểm CC (10%)</th>
+                                    <th width="15%" class="text-center">Điểm GK (30%)</th>
+                                    <th width="15%" class="text-center">Điểm CK (60%)</th>
+                                    <th width="20%" class="text-center bg-light text-primary fw-bold">Tổng Kết</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="en : ${enrollments}">
+                                    <td class="text-center text-muted fw-bold" th:text="${en.student.id}">ID</td>
+                                    <td>
+                                        <div class="fw-bold" th:text="${en.student.fullName}">Name</div>
+                                    </td>
+                                    <td class="text-center px-4">
+                                        <input type="number" step="0.1" min="0" max="10" 
+                                               class="form-control form-control-sm text-center grade-input cc" 
+                                               th:name="'attendance_' + ${en.student.id}" 
+                                               th:value="${en.attendanceGrade}">
+                                    </td>
+                                    <td class="text-center px-4">
+                                        <input type="number" step="0.1" min="0" max="10" 
+                                               class="form-control form-control-sm text-center grade-input gk" 
+                                               th:name="'midterm_' + ${en.student.id}" 
+                                               th:value="${en.midtermGrade}">
+                                    </td>
+                                    <td class="text-center px-4">
+                                        <input type="number" step="0.1" min="0" max="10" 
+                                               class="form-control form-control-sm text-center grade-input ck" 
+                                               th:name="'final_' + ${en.student.id}" 
+                                               th:value="${en.finalGrade}">
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="fs-5 fw-bold total-display" th:text="${en.totalGrade != null ? #numbers.formatDecimal(en.totalGrade, 1, 1) : '-'}">-</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${enrollments.empty}">
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="bi bi-emoji-frown fs-2 d-block mb-2"></i> Không có dữ liệu sinh viên cho lớp/môn đã chọn
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="card-footer bg-white py-3 border-top d-flex justify-content-end" th:if="${!enrollments.empty}">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-save me-1"></i> Lưu Bảng Điểm
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // Tự động tính điểm tổng kết ngay trên trình duyệt (Real-time)
+            document.addEventListener("DOMContentLoaded", function () {
+                const rows = document.querySelectorAll("tbody tr");
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('.grade-input');
+                    const totalDisplay = row.querySelector('.total-display');
+                    
+                    if(inputs.length === 3) {
+                        inputs.forEach(input => {
+                            input.addEventListener('input', function() {
+                                let cc = parseFloat(row.querySelector('.cc').value) || 0;
+                                let gk = parseFloat(row.querySelector('.gk').value) || 0;
+                                let ck = parseFloat(row.querySelector('.ck').value) || 0;
+                                
+                                if (row.querySelector('.cc').value && row.querySelector('.gk').value && row.querySelector('.ck').value) {
+                                    let total = (cc * 0.1) + (gk * 0.3) + (ck * 0.6);
+                                    totalDisplay.innerText = total.toFixed(1);
+                                    
+                                    // Change color based on fail/pass
+                                    if (total < 4.0) {
+                                        totalDisplay.className = "fs-5 fw-bold total-display text-danger";
+                                    } else if (total >= 8.0) {
+                                        totalDisplay.className = "fs-5 fw-bold total-display text-success";
+                                    } else {
+                                        totalDisplay.className = "fs-5 fw-bold total-display text-body";
+                                    }
+                                } else {
+                                    totalDisplay.innerText = '-';
+                                }
+                            });
+                        });
+                    }
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>

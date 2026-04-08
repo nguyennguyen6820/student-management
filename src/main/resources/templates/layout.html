@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title layout:title-pattern="$CONTENT_TITLE">Hệ thống Quản lý Sinh viên</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #ffffff;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+            color: white;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+            list-style: none;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            padding: 5px 20px;
+        }
+
+        .sidebar-menu a {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            color: #555;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: #f0f4ff;
+            color: #4e73df;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            min-height: 100vh;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+        }
+
+        /* Premium Buttons */
+        .btn-primary {
+            background-color: #4e73df;
+            border-color: #4e73df;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background-color: #2e59d9;
+            border-color: #2653d4;
+        }
+
+        .table th {
+            background-color: #f8f9fc;
+            color: #555;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 85%;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-mortarboard-fill me-2"></i> SV Manager
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="/" class="nav-link-item"><i class="bi bi-grid-1x2-fill"></i> Trang chủ</a></li>
+            <li><a href="/students" class="nav-link-item"><i class="bi bi-people-fill"></i> Quản lý sinh viên</a></li>
+            <li><a href="/classes" class="nav-link-item"><i class="bi bi-easel-fill"></i> Quản lý lớp học</a></li>
+            <li><a href="/subjects" class="nav-link-item"><i class="bi bi-book-fill"></i> Quản lý môn học</a></li>
+            <li><a href="/instructors" class="nav-link-item"><i class="bi bi-person-workspace"></i> Quản lý giảng viên</a></li>
+            <li><a href="/grades" class="nav-link-item"><i class="bi bi-award-fill"></i> Xem điểm</a></li>
+        </ul>
+    </nav>
+
+    <!-- Content -->
+    <div class="main-content">
+        <div layout:fragment="content">
+        </div>
+        
+        <footer class="text-center mt-5 py-3 border-top text-muted" style="font-size: 0.9rem;">
+            <p>&copy; 2026 - Bài tập lớn công nghệ Java</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js for dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const currentPath = window.location.pathname;
+            const links = document.querySelectorAll('.nav-link-item');
+            
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentPath || (href !== '/' && currentPath.startsWith(href))) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

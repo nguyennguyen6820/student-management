@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+<head>
+    <title>Bảng điểm cá nhân</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3 text-gray-800 mb-0 fw-bold">Chi tiết Bảng điểm Của Môn Học</h2>
+            <a href="/students" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Trở về DS Sinh viên
+            </a>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom border-primary border-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-primary">
+                    Sinh viên: <span class="fs-5 text-dark" th:text="${student.fullName}"></span> 
+                    (Mã SV: <span th:text="${student.id}"></span>)
+                </h6>
+                <h5 class="m-0 text-success fw-bold">
+                    Điểm TB Tích Lũy (CPA): <span th:text="${gpa != null ? #numbers.formatDecimal(gpa, 1, 1) : 'N/A'}"></span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th width="20%">Môn học</th>
+                                <th class="text-center" width="10%">Tín chỉ</th>
+                                <th class="text-center" width="15%">Chuyên cần</th>
+                                <th class="text-center" width="15%">Giữa kỳ</th>
+                                <th class="text-center" width="15%">Cuối kỳ</th>
+                                <th class="text-center" width="15%">Tổng kết</th>
+                                <th class="text-center" width="10%">Xếp loại</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="en : ${enrollments}">
+                                <td class="fw-bold text-dark" th:text="${en.subject.name}">Môn</td>
+                                <td class="text-center" th:text="${en.subject.credits}">3</td>
+                                <td class="text-center" th:text="${en.attendanceGrade}">10</td>
+                                <td class="text-center" th:text="${en.midtermGrade}">8</td>
+                                <td class="text-center" th:text="${en.finalGrade}">7</td>
+                                <td class="text-center fw-bold fs-6">
+                                    <span th:if="${en.totalGrade != null}" th:text="${en.totalGrade}" th:classappend="${en.totalGrade >= 4.0 ? 'text-success' : 'text-danger'}"></span>
+                                    <span th:unless="${en.totalGrade != null}" class="text-muted">Đang học</span>
+                                </td>
+                                <td class="text-center">
+                                    <span th:if="${en.totalGrade != null and en.totalGrade >= 8.5}" class="badge bg-success">Giỏi</span>
+                                    <span th:if="${en.totalGrade != null and en.totalGrade >= 6.5 and en.totalGrade < 8.5}" class="badge bg-primary">Khá</span>
+                                    <span th:if="${en.totalGrade != null and en.totalGrade >= 4.0 and en.totalGrade < 6.5}" class="badge bg-warning text-dark">Trung Bình</span>
+                                    <span th:if="${en.totalGrade != null and en.totalGrade < 4.0}" class="badge bg-danger">Trượt</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${enrollments.empty}">
+                                <td colspan="7" class="text-center py-4 text-muted">Sinh viên này chưa đăng ký môn học nào hoặc chưa có điểm.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+<head>
+    <title>Danh sách Môn Học</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3 text-gray-800 mb-0 fw-bold">Danh sách Môn Học</h2>
+            <a href="/subjects/new" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Thêm môn học mới
+            </a>
+        </div>
+
+        <div class="card shadow-sm mb-4 border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="text-center" width="5%">ID</th>
+                                <th>Tên Môn Học</th>
+                                <th class="text-center">Số Tín Chỉ (Credits)</th>
+                                <th class="text-center" width="15%">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="sub : ${subjects}">
+                                <td class="text-center fw-bold text-muted" th:text="${sub.id}">1</td>
+                                <td class="fw-bold" th:text="${sub.name}">Name</td>
+                                <td class="text-center">
+                                    <span class="badge bg-info text-dark" th:text="${sub.credits + ' Tín chỉ'}">3 Tín chỉ</span>
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{/subjects/edit/{id}(id=${sub.id})}" class="btn btn-sm btn-outline-warning rounded-circle me-1" title="Sửa">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <a th:href="@{/subjects/delete/{id}(id=${sub.id})}" class="btn btn-sm btn-outline-danger rounded-circle" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa môn này?');">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${subjects.empty}">
+                                <td colspan="4" class="text-center py-4 text-muted">Không có dữ liệu môn học</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

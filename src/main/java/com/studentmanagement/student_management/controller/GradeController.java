@@ -11,6 +11,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import com.studentmanagement.student_management.repository.UserRepository;
 import java.util.Map;
 
 @Controller
@@ -26,6 +30,7 @@ public class GradeController {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
     @GetMapping
     public String listGrades(
             @RequestParam(required = false) Integer classId,
@@ -65,6 +70,7 @@ public class GradeController {
     @Autowired
     private GradeService gradeService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
     @PostMapping("/save")
     public String saveGrades(
         @RequestParam Integer classId, 
@@ -81,6 +87,7 @@ public class GradeController {
     @Autowired
     private com.studentmanagement.student_management.service.ExcelExportService excelService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
     @GetMapping("/export")
     public org.springframework.http.ResponseEntity<org.springframework.core.io.InputStreamResource> exportGrades(
             @RequestParam Integer classId,
@@ -130,4 +137,24 @@ public class GradeController {
         
         return "grade/student_detail";
     }
+
+    @PreAuthorize("hasRole('STUDENT')")
+    @GetMapping("/my-grades")
+    public String showMyTranscript(Model model) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username;
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails)principal).getUsername();
+        } else {
+            username = principal.toString();
+        }
+        
+        com.studentmanagement.student_management.entity.Student student = studentRepository.findByUserUsername(username);
+        if (student == null) {
+            return "redirect:/login?error=notfound";
+        }
+        
+        return "redirect:/grades/student/" + student.getId();
+    }
+
 }

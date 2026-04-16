@@ -58,9 +58,27 @@ public class StudentController {
         return "student/form";
     }
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     @PostMapping("/save")
     public String saveStudent(@ModelAttribute("student") Student student) {
-        studentRepository.save(student);
+        try {
+            if (student.getId() == null && student.getUser() == null) {
+                com.studentmanagement.student_management.entity.User user = new com.studentmanagement.student_management.entity.User();
+                String baseUsername = (student.getEmail() != null && student.getEmail().contains("@")) ? student.getEmail().split("@")[0] : "std";
+                String username = baseUsername + "_" + (System.currentTimeMillis() % 10000);
+                user.setUsername(username);
+                user.setPassword(passwordEncoder.encode("123456"));
+                user.setFullName(student.getFullName() != null ? student.getFullName() : "Sinh Vien");
+                user.setRole(com.studentmanagement.student_management.entity.Role.ROLE_STUDENT);
+                student.setUser(user);
+            }
+            studentRepository.save(student);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("ERROR WHILE SAVING STUDENT: " + e.getMessage(), e);
+        }
         return "redirect:/students";
     }
 

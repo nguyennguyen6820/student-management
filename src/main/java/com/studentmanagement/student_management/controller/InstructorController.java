@@ -32,9 +32,27 @@ public class InstructorController {
         return "instructor/form";
     }
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     @PostMapping("/save")
     public String saveInstructor(@ModelAttribute("instructor") Instructor instructor) {
-        instructorRepository.save(instructor);
+        try {
+            if (instructor.getId() == null && instructor.getUser() == null) {
+                com.studentmanagement.student_management.entity.User user = new com.studentmanagement.student_management.entity.User();
+                String baseUsername = (instructor.getEmail() != null && instructor.getEmail().contains("@")) ? instructor.getEmail().split("@")[0] : "ins";
+                String username = baseUsername + "_" + (System.currentTimeMillis() % 10000);
+                user.setUsername(username);
+                user.setPassword(passwordEncoder.encode("123456"));
+                user.setFullName(instructor.getFullName() != null ? instructor.getFullName() : "Giang Vien");
+                user.setRole(com.studentmanagement.student_management.entity.Role.ROLE_INSTRUCTOR);
+                instructor.setUser(user);
+            }
+            instructorRepository.save(instructor);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("ERROR WHILE SAVING INSTRUCTOR: " + e.getMessage(), e);
+        }
         return "redirect:/instructors";
     }
 

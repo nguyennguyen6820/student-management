@@ -29,4 +29,8 @@ public class Student {
     @ManyToOne // Nhiều sinh viên thuộc về một lớp
     @JoinColumn(name = "class_id") // Tên cột khóa ngoại trong bảng student
     private Classroom classroom;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 }

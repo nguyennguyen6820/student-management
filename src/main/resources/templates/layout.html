@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -71,6 +73,13 @@
             background-color: #f0f4ff;
             color: #4e73df;
         }
+        
+        .logout-btn {
+            color: #e74a3b !important;
+        }
+        .logout-btn:hover {
+            background-color: #fceceb !important;
+        }
 
         /* Main Content */
         .main-content {
@@ -124,11 +133,18 @@
         </div>
         <ul class="sidebar-menu">
             <li><a href="/" class="nav-link-item"><i class="bi bi-grid-1x2-fill"></i> Trang chủ</a></li>
-            <li><a href="/students" class="nav-link-item"><i class="bi bi-people-fill"></i> Quản lý sinh viên</a></li>
-            <li><a href="/classes" class="nav-link-item"><i class="bi bi-easel-fill"></i> Quản lý lớp học</a></li>
-            <li><a href="/subjects" class="nav-link-item"><i class="bi bi-book-fill"></i> Quản lý môn học</a></li>
-            <li><a href="/instructors" class="nav-link-item"><i class="bi bi-person-workspace"></i> Quản lý giảng viên</a></li>
-            <li><a href="/grades" class="nav-link-item"><i class="bi bi-award-fill"></i> Xem điểm</a></li>
+            
+            <li sec:authorize="hasRole('ADMIN')"><a href="/students" class="nav-link-item"><i class="bi bi-people-fill"></i> Quản lý sinh viên</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a href="/classes" class="nav-link-item"><i class="bi bi-easel-fill"></i> Quản lý lớp học</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a href="/subjects" class="nav-link-item"><i class="bi bi-book-fill"></i> Quản lý môn học</a></li>
+            <li sec:authorize="hasRole('ADMIN')"><a href="/instructors" class="nav-link-item"><i class="bi bi-person-workspace"></i> Quản lý giảng viên</a></li>
+            
+            <li sec:authorize="hasAnyRole('ADMIN', 'INSTRUCTOR')"><a href="/grades" class="nav-link-item"><i class="bi bi-award-fill"></i> Quản lý điểm</a></li>
+            <li sec:authorize="hasRole('STUDENT')"><a href="/grades/my-grades" class="nav-link-item"><i class="bi bi-award-fill"></i> Xem điểm của tôi</a></li>
+            
+            <li style="margin-top: 50px;">
+                <a href="/logout" class="nav-link-item logout-btn"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+            </li>
         </ul>
     </nav>
 

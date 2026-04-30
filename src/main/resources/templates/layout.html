@@ -148,6 +148,18 @@
         </ul>
     </nav>
 
+    <!-- Toast Notification Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11">
+        <div id="saveToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle me-2"></i> Lưu dữ liệu thành công!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Content -->
     <div class="main-content">
         <div layout:fragment="content">
@@ -170,6 +182,21 @@
                 const href = link.getAttribute('href');
                 if (href === currentPath || (href !== '/' && currentPath.startsWith(href))) {
                     link.classList.add('active');
+                }
+            });
+
+            // Handle form submission for save/save buttons
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton && submitButton.textContent.toLowerCase().includes('lưu')) {
+                    form.addEventListener('submit', function(e) {
+                        const toast = document.getElementById('saveToast');
+                        if (toast) {
+                            const bsToast = new bootstrap.Toast(toast);
+                            bsToast.show();
+                        }
+                    });
                 }
             });
         });

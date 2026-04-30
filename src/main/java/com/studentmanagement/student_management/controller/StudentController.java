@@ -67,7 +67,7 @@ public class StudentController {
             if (student.getId() == null && student.getUser() == null) {
                 com.studentmanagement.student_management.entity.User user = new com.studentmanagement.student_management.entity.User();
                 String baseUsername = (student.getEmail() != null && student.getEmail().contains("@")) ? student.getEmail().split("@")[0] : "std";
-                String username = baseUsername + "_" + (System.currentTimeMillis() % 10000);
+                String username = baseUsername;
                 user.setUsername(username);
                 user.setPassword(passwordEncoder.encode("123456"));
                 user.setFullName(student.getFullName() != null ? student.getFullName() : "Sinh Vien");

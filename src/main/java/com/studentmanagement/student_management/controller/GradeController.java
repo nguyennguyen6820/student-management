@@ -14,7 +14,6 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import com.studentmanagement.student_management.repository.UserRepository;
 import java.util.Map;
 
 @Controller
@@ -23,10 +22,10 @@ public class GradeController {
 
     @Autowired
     private ClassroomRepository classroomRepository;
-    
+
     @Autowired
     private SubjectRepository subjectRepository;
-    
+
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
@@ -36,13 +35,14 @@ public class GradeController {
             @RequestParam(required = false) Integer classId,
             @RequestParam(required = false) Integer subjectId,
             Model model) {
-        
+
         model.addAttribute("classrooms", classroomRepository.findAll());
         model.addAttribute("subjects", subjectRepository.findAll());
-        
+
         if (classId != null && subjectId != null) {
-            List<Enrollment> enrollments = enrollmentRepository.findBySubjectIdAndStudentClassroomId(subjectId, classId);
-            
+            List<Enrollment> enrollments = enrollmentRepository.findBySubjectIdAndStudentClassroomId(subjectId,
+                    classId);
+
             // Lọc loại bỏ Enrollment bị trùng lặp do bấm đúp đăng ký môn
             java.util.Map<Integer, Enrollment> uniqueEnrollments = new java.util.HashMap<>();
             java.util.List<Enrollment> toDelete = new java.util.ArrayList<>();
@@ -57,9 +57,9 @@ public class GradeController {
                 enrollmentRepository.deleteAll(toDelete);
             }
             java.util.List<Enrollment> distinctEnrollments = new java.util.ArrayList<>(uniqueEnrollments.values());
-            
+
             model.addAttribute("enrollments", distinctEnrollments);
-            
+
             model.addAttribute("selectedClass", classroomRepository.findById(classId).orElse(null));
             model.addAttribute("selectedSubject", subjectRepository.findById(subjectId).orElse(null));
         }
@@ -73,14 +73,14 @@ public class GradeController {
     @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
     @PostMapping("/save")
     public String saveGrades(
-        @RequestParam Integer classId, 
-        @RequestParam Integer subjectId,
-        @RequestParam Map<String, String> requestParams) {
-        
+            @RequestParam Integer classId,
+            @RequestParam Integer subjectId,
+            @RequestParam Map<String, String> requestParams) {
+
         List<Enrollment> enrollments = enrollmentRepository.findBySubjectIdAndStudentClassroomId(subjectId, classId);
-        
+
         gradeService.processAndSaveGrades(enrollments, requestParams);
-        
+
         return "redirect:/grades?classId=" + classId + "&subjectId=" + subjectId;
     }
 
@@ -96,7 +96,7 @@ public class GradeController {
         List<Enrollment> enrollments = enrollmentRepository.findBySubjectIdAndStudentClassroomId(subjectId, classId);
         String className = classroomRepository.findById(classId).map(c -> c.getName()).orElse("Unknown");
         String subjectName = subjectRepository.findById(subjectId).map(s -> s.getName()).orElse("Unknown");
-        
+
         java.io.ByteArrayInputStream in = excelService.exportGradesToExcel(enrollments, className, subjectName);
 
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
@@ -105,7 +105,8 @@ public class GradeController {
         return org.springframework.http.ResponseEntity
                 .ok()
                 .headers(headers)
-                .contentType(org.springframework.http.MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .contentType(org.springframework.http.MediaType
+                        .parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(new org.springframework.core.io.InputStreamResource(in));
     }
 
@@ -115,26 +116,55 @@ public class GradeController {
     @GetMapping("/student/{id}")
     public String showStudentTranscript(@PathVariable Integer id, Model model) {
         com.studentmanagement.student_management.entity.Student student = studentRepository.findById(id).orElse(null);
-        if (student == null) return "redirect:/students";
+        if (student == null)
+            return "redirect:/students";
+
+        // Kiểm tra quyền: Sinh viên chỉ được xem điểm của chính mình
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username;
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails) principal).getUsername();
+        } else {
+            username = principal.toString();
+        }
         
+        com.studentmanagement.student_management.entity.Student currentStudent = studentRepository.findByUserUsername(username);
+        if (currentStudent != null && !currentStudent.getId().equals(id)) {
+            // Nếu đang đăng nhập với tài khoản sinh viên và không phải chính mình
+            org.springframework.security.core.GrantedAuthority roleAuth = SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .filter(a -> a.getAuthority().equals("ROLE_STUDENT"))
+                .findFirst().orElse(null);
+            if (roleAuth != null) {
+                return "redirect:/grades/my-grades";
+            }
+        }
+
         List<Enrollment> enrollments = enrollmentRepository.findByStudentId(id);
-        
+
         double totalSum = 0;
         int totalCredits = 0;
-        
+
         for (Enrollment en : enrollments) {
             if (en.getTotalGrade() != null) {
                 totalSum += en.getTotalGrade() * en.getSubject().getCredits();
                 totalCredits += en.getSubject().getCredits();
             }
         }
-        
+
         Double gpa = totalCredits > 0 ? (totalSum / totalCredits) : null;
-        
+
         model.addAttribute("enrollments", enrollments);
         model.addAttribute("gpa", gpa);
         model.addAttribute("student", student);
         
+        // Gửi thông tin để template biết role hiện tại
+        String currentRole = SecurityContextHolder.getContext().getAuthentication()
+            .getAuthorities().stream()
+            .map(a -> a.getAuthority())
+            .findFirst().orElse("");
+        model.addAttribute("currentRole", currentRole);
+
         return "grade/student_detail";
     }
 
@@ -144,16 +174,17 @@ public class GradeController {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username;
         if (principal instanceof UserDetails) {
-            username = ((UserDetails)principal).getUsername();
+            username = ((UserDetails) principal).getUsername();
         } else {
             username = principal.toString();
         }
-        
-        com.studentmanagement.student_management.entity.Student student = studentRepository.findByUserUsername(username);
+
+        com.studentmanagement.student_management.entity.Student student = studentRepository
+                .findByUserUsername(username);
         if (student == null) {
             return "redirect:/login?error=notfound";
         }
-        
+
         return "redirect:/grades/student/" + student.getId();
     }
 
